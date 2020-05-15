@@ -14,7 +14,7 @@ class _CalculatorState extends State<Calculator> {
   double result;
   String res = '';
   bool decimalPresent = false;
-  double resultFontSize = 40;
+  double resultFontSize = 30;
   // To display number after removing the trailing zeros at the end of a number after decimal point
   final display = createDisplay(
     decimal: 8,
@@ -91,7 +91,7 @@ class _CalculatorState extends State<Calculator> {
         onPressed: () {
           math(buttonPressed);
         },
-        height: 68,
+        height: 60,
         color: Colors.white12,
         child: Text(
           buttonPressed,
@@ -119,12 +119,6 @@ class _CalculatorState extends State<Calculator> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      /*decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('images/bg2.png'),
-          fit: BoxFit.fill,
-        ),
-      ),*/
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -144,7 +138,7 @@ class _CalculatorState extends State<Calculator> {
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize:
-                      equation == '' ? resultFontSize + 20 : resultFontSize),
+                      equation == '' ? resultFontSize + 30 : resultFontSize),
             ),
           ),
           myRow('CLR', 'DLT', '^', '/'),
