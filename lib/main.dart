@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:calculatorapp/outlineCalculation.dart';
 
 void main() {
-  String equation = '';
+  //String equation = '';
   runApp(MyApp());
 }
 
