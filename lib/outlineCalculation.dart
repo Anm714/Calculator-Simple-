@@ -10,75 +10,86 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
-  String equation = '';
-  double result;
-  String res = '';
+  String equation = ' ';
+  double result = 0;
+  String res = '0';
   bool decimalPresent = false;
   double resultFontSize = 30;
+  String lastDigit;
   // To display number after removing the trailing zeros at the end of a number after decimal point
   final display = createDisplay(
+    length: 12,
     decimal: 8,
   );
 
   //Function to do the calculation/requisite on pressing a button.
   void math(String buttonPressed) {
     setState(() {
+      lastDigit = equation.substring(equation.length - 1);
       if (buttonPressed == 'CLR') {
-        equation = '';
+        equation = ' ';
         res = '0';
+        result = 0;
       } else if (buttonPressed == '.') {
         if (decimalPresent == false) {
           equation = equation + buttonPressed;
           decimalPresent = true;
         }
       } else if (buttonPressed == '=') {
+        equation = ' ';
         res = display(result); //from package number display.
-        equation = '';
       } else if (buttonPressed == '+' ||
           buttonPressed == "-" ||
           buttonPressed == '*' ||
           buttonPressed == '/' ||
           buttonPressed == '^') {
         decimalPresent = false;
-        String lastEntered = equation.substring(equation.length - 1);
-        //To ignore the previous operand on pressing the another operand soon after.
-        if (lastEntered == '+' ||
-            lastEntered == "-" ||
-            lastEntered == '*' ||
-            lastEntered == '/' ||
-            lastEntered == '^')
+        //To ignore the previous operator on pressing the another operator soon after.
+        if (lastDigit == '+' ||
+            lastDigit == "-" ||
+            lastDigit == '*' ||
+            lastDigit == '/' ||
+            lastDigit == '^')
           equation = equation.substring(0, equation.length - 1) + buttonPressed;
         else
           equation = equation + buttonPressed;
       } else {
-        if (buttonPressed == 'DLT')
-          equation = equation.substring(0, equation.length - 1);
-        else //if it is a number
+        if (buttonPressed == 'DLT') {
+          decimalPresent = lastDigit == '.' ? false : decimalPresent;
+          equation = equation.length != 1
+              ? equation.substring(0, equation.length - 1)
+              : ' '; //if last element is deleted
+        } else //if it is a number
           equation = equation + buttonPressed;
-//On deleting the previous character, if last character is not an operand, do the calculation.. else do the calculation ignoring the last operand.
-        if (equation.substring(equation.length - 1) != '+' &&
-            equation.substring(equation.length - 1) != '-' &&
-            equation.substring(equation.length - 1) != '*' &&
-            equation.substring(equation.length - 1) != '/' &&
-            equation.substring(equation.length - 1) != '^') {
+        lastDigit = equation.substring(equation.length - 1);
+        if (lastDigit == '+' ||
+            lastDigit == "-" ||
+            lastDigit == '*' ||
+            lastDigit == '/' ||
+            lastDigit == '^') {
+          //this case arises when a character is deleted.
+          try {
+            Expression exp = Parser().parse(
+              equation.substring(
+                  0,
+                  equation.length -
+                      1), //So that the expression to be evaluated don't end with an operator.
+            );
+            ContextModel cm = ContextModel();
+            result = exp.evaluate(EvaluationType.REAL, cm);
+            res = display(result);
+          } catch (e) {}
+        } else if (equation ==
+            ' ') //this case also arises when a character is deleted.
+          res = '0';
+        else {
+          // this case arise when button pressed is a number.
           try {
             Expression exp = Parser().parse(equation);
             ContextModel cm = ContextModel();
             result = exp.evaluate(EvaluationType.REAL, cm);
             res = display(result);
-          } catch (e) {
-            res = 'Error';
-          }
-        } else {
-          try {
-            Expression exp =
-                Parser().parse(equation.substring(0, equation.length - 1));
-            ContextModel cm = ContextModel();
-            result = exp.evaluate(EvaluationType.REAL, cm);
-            res = display(result);
-          } catch (e) {
-            res = 'Error';
-          }
+          } catch (e) {}
         }
       }
     });
@@ -134,11 +145,13 @@ class _CalculatorState extends State<Calculator> {
           Padding(
             padding: const EdgeInsets.only(bottom: 40.0),
             child: Text(
-              res,
+              (result.isInfinite || result.isNaN)
+                  ? '=Can\'t divide by zero'
+                  : res,
               textAlign: TextAlign.end,
               style: TextStyle(
                   fontSize:
-                      equation == '' ? resultFontSize + 30 : resultFontSize),
+                      equation == ' ' ? resultFontSize + 20 : resultFontSize),
             ),
           ),
           myRow('CLR', 'DLT', '^', '/'),
